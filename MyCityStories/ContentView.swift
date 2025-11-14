@@ -6,15 +6,25 @@
 //
 
 import SwiftUI
-import MapKit
 
 struct ContentView: View {
     
     var body: some View {
-        Map()
+        TabView {
+            MapHomeView()
+                .tabItem {
+                    Label("Map", systemImage: "map")
+                }
+            
+            MemoriesListView()
+                .tabItem {
+                    Label("List", systemImage: "list.bullet")
+                }
+        }
     }
     
 }
+
 
 #Preview {
     ContentView()
