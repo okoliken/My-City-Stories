@@ -1,0 +1,86 @@
+My City Stories - Product Requirements Document
+
+Project Overview
+A location-based memory journal iOS app that allows users to pin
+memories to specific locations on a map, with photos
+and notes.
+
+Core Features & Requirements
+
+1. Map View (Home Screen)
+  Requirements:
+    * Display interactive map centered on user's current location
+    * Show all saved memory pins on the map
+    * Custom pin annotations with category colors
+    * Tap-and-hold gesture to drop new pin at location
+    * Smooth zoom and pan interactions
+    * "Center on user" button
+ User Flow:
+    1. User opens app → Map loads with current location
+    2. User sees existing memory pins scattered on map
+    3. User long-presses location → Pin drops → "Add Memory" sheet appears
+    4. User taps existing pin → Memory detail preview appears
+    
+2. Add/Edit Memory
+  Requirements:
+    * Title field (required, max 50 characters)
+    * Note/description field (optional, max 500 characters)
+    * Date picker (defaults to today)
+    * Category selector (Food, Friends, Travel, Work, Other)
+    * Photo attachment (1 photo per memory)
+    * Location automatically captured from pin position
+    * Save/Cancel buttons
+ Validation:
+    * Title cannot be empty
+    * Show error if save fails
+    * Confirm before canceling if user has entered data
+    
+3. Memory Detail View
+  Requirements:
+    * Display full-size photo (if available)
+    * Show title, date, category, and full note
+    * Display address/location name
+    * "Get Directions" button (opens Apple Maps)
+    * Edit button (navigates to edit screen)
+    * Delete button (with confirmation alert)
+    * Share button (share photo + text)
+    
+4. List View (Alternative View)
+  Requirements:
+    * Scrollable list of all memories
+    * Sort options: Recent, Oldest, Alphabetical
+    * Search bar to filter by title/note
+    * Category filter chips
+    * Each cell shows: thumbnail, title, date, category
+    * Tap cell → opens detail view
+    * Swipe-to-delete gesture
+    
+5. Data Persistence
+  Requirements:
+    * Save memories locally (CoreData or SwiftData)
+    * Data model includes:
+    * ID (UUID)
+    * Title (String)
+    * Note (String, optional)
+    * Date (Date)
+    * Latitude (Double)
+    * Longitude (Double)
+    * Category (Enum)
+    * PhotoData (Data, optional)
+    * Created timestamp
+    * Modified timestamp
+    
+6. Photo Management
+  Requirements:
+    * Access camera (with permission)
+    * Access photo library (with permission)
+    * Compress images before saving (max 1MB)
+    * Handle missing/deleted photos gracefully
+    * Photo picker UI
+
+7. Permissions
+  Requirements:
+    * Location: "When In Use" permission
+    * Camera: Permission with clear explanation
+    * Photo Library: Permission with clear explanation
+    * Proper Info.plist descriptions for all permissions
