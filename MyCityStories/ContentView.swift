@@ -10,17 +10,7 @@ import SwiftUI
 struct ContentView: View {
     
     var body: some View {
-        TabView {
-            MapHomeView()
-                .tabItem {
-                    Label("Map", systemImage: "map")
-                }
-            
-            MemoriesListView()
-                .tabItem {
-                    Label("List", systemImage: "list.bullet")
-                }
-        }
+        MemoryMapView()
     }
     
 }

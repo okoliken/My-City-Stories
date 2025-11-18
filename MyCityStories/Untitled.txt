@@ -9,14 +9,14 @@ Core Features & Requirements
 
 1. Map View (Home Screen)
   Requirements:
-    * Display interactive map centered on user's current location
+    * Display interactive map centered on user's current location -- DONE
     * Show all saved memory pins on the map
     * Custom pin annotations with category colors
     * Tap-and-hold gesture to drop new pin at location
     * Smooth zoom and pan interactions
     * "Center on user" button
  User Flow:
-    1. User opens app → Map loads with current location
+    1. User opens app → Map loads with current location -- DONE
     2. User sees existing memory pins scattered on map
     3. User long-presses location → Pin drops → "Add Memory" sheet appears
     4. User taps existing pin → Memory detail preview appears

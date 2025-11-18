@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Memory: Identifiable {
+struct Memory: Identifiable, Equatable {
     let id = UUID()
     let title: String
     let note: String
