@@ -57,8 +57,10 @@ struct MemoryMapView: View {
     @State private var openNewpinSheet: Bool = false
     @State var showBottomMapNavigationSheet: Bool = true
     @State var selectedMemoryCoordinates: CoordinateWrapper? = nil
-    // Dummy data for now
-    @State private var memories: [LocationMemory] = []
+
+    @State private var memories: [LocationMemory] = [
+        .init(id: UUID(), title: "Chicken republic - Rumuesera", note: "Really enjoyed the food, plus it's really close by", date: Date(), latitude: 6.458985, longitude: 3.601521, category: .food)
+    ]
     
     var body: some View {
         ZStack {
@@ -89,9 +91,23 @@ struct MemoryMapView: View {
                                 case .second(true, let drag):
                                     if let location = drag?.location,
                                        let coordinate = proxy.convert(location, from: .local) {
-                                        print(coordinate.longitude)
-                                        selectedMemoryCoordinates = CoordinateWrapper(coordinate)
-                                       
+                                        memories
+                                            .append(
+                                                LocationMemory(
+                                                    id: UUID(),
+                                                    title: "",
+                                                    note: "",
+                                                    date: Date(),
+                                                    latitude: coordinate.latitude,
+                                                    longitude: coordinate.longitude,
+                                                    category: .other
+                                                )
+                                            )
+                                        selectedMemoryCoordinates = CoordinateWrapper(
+                                            coordinate
+                                        )
+                                        
+                                        
                                     }
                                 default:
                                     break
@@ -100,11 +116,11 @@ struct MemoryMapView: View {
                 )
                 .onAppear {
     //                mapManager.requestWhenInUseAuthorization()
-                             let center = CLLocationCoordinate2D(latitude: 6.458985, longitude: 3.601521)
-                             let span = MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
-                             let region = MKCoordinateRegion(center: center, span: span)
-                 
-                    position = .region(region)
+//                             let center = CLLocationCoordinate2D(latitude: 6.458985, longitude: 3.601521)
+//                             let span = MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
+//                             let region = MKCoordinateRegion(center: center, span: span)
+//                 
+//                    position = .region(a)
                 }
                 .onChange(of: selectedMemoryCoordinates) {
                     openNewpinSheet = true

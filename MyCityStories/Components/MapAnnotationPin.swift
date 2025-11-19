@@ -11,23 +11,42 @@ struct MapAnnotationPin: View {
     let memory: LocationMemory
     let iconName: (_ category: LocationMemory.Category) -> String
     
+    @State private var isPulsing = false
+    @State private var isPressed = false
+    @State private var scale: CGFloat = 0.0
     
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 6) {
             ZStack {
-                // Outer glow effect
                 Circle()
-                    .fill(memory.category.color.opacity(0.3))
-                    .frame(width: 36, height: 36)
-                    .blur(radius: 4)
+                    .fill(
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                memory.category.color.opacity(0.4),
+                                memory.category.color.opacity(0.1),
+                                .clear
+                            ]),
+                            center: .center,
+                            startRadius: 10,
+                            endRadius: 25
+                        )
+                    )
+                    .frame(width: 50, height: 50)
+                    .scaleEffect(isPulsing ? 1.3 : 1.0)
+                    .opacity(isPulsing ? 0 : 1)
                 
-                // Main circle with gradient
+                Circle()
+                    .fill(memory.category.color.opacity(0.25))
+                    .frame(width: 40, height: 40)
+                    .blur(radius: 6)
+                
                 Circle()
                     .fill(
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                memory.category.color.opacity(0.9),
-                                memory.category.color
+                                memory.category.color.opacity(0.95),
+                                memory.category.color,
+                                memory.category.color.opacity(0.85)
                             ]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -36,34 +55,87 @@ struct MapAnnotationPin: View {
                     .frame(width: 32, height: 32)
                     .overlay(
                         Circle()
-                            .stroke(Color.white, lineWidth: 3)
-                            .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
+                            .stroke(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.white.opacity(0.8),
+                                        Color.white.opacity(0.4)
+                                    ]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                ),
+                                lineWidth: 3
+                            )
                     )
+                    .shadow(color: memory.category.color.opacity(0.5), radius: 4, x: 0, y: 2)
+                    .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
                 
-                // Icon
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.white.opacity(0.3),
+                                .clear
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .center
+                        )
+                    )
+                    .frame(width: 32, height: 32)
+                    .blur(radius: 2)
+                
                 Image(systemName: iconName(memory.category))
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(.white)
-                    .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
+                    .shadow(color: .black.opacity(0.4), radius: 2, x: 0, y: 1)
             }
+            .scaleEffect(isPressed ? 0.9 : 1.0)
             
-            // Label with improved styling
+
             Text(memory.title)
                 .font(.caption)
-                .fontWeight(.medium)
+                .fontWeight(.semibold)
                 .foregroundStyle(.primary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(.ultraThinMaterial)
-                        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(.ultraThinMaterial)
+                        
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.white.opacity(0.1),
+                                        .clear
+                                    ]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                    }
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(Color.white.opacity(0.5), lineWidth: 0.5)
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.white.opacity(0.6),
+                                    Color.white.opacity(0.2)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 1
+                        )
                 )
+                .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
         }
-        .shadow(color: memory.category.color.opacity(0.4), radius: 8, x: 0, y: 4)
+        .scaleEffect(scale)
+        .animation(.bouncy, value: scale)
+        .onAppear {
+            scale = 1.0
+        }
     }
 }

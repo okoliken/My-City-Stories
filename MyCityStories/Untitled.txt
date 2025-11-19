@@ -10,7 +10,7 @@ Core Features & Requirements
 1. Map View (Home Screen)
   Requirements:
     * Display interactive map centered on user's current location -- DONE
-    * Show all saved memory pins on the map
+    * Show all saved memory pins on the map -- DONE (WITH DUMMY DATA) IMPLEMENTATION PENDING
     * Custom pin annotations with category colors
     * Tap-and-hold gesture to drop new pin at location
     * Smooth zoom and pan interactions

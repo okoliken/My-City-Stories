@@ -151,7 +151,6 @@ struct AddEditMemoryView: View {
                 RoundedRectangle(cornerRadius: DesignTokens.Radius.md)
                     .stroke(Color(.systemGray6), lineWidth: 1)
             )
-            .shadow(color: DesignTokens.Shadow.small(), radius: 4, y: 2)
         }
     }
     
