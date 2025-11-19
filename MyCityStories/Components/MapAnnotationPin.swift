@@ -9,12 +9,9 @@ import SwiftUI
 
 struct MapAnnotationPin: View {
     let memory: LocationMemory
-    let iconName: (_ category: LocationMemory.Category) -> String
+    let iconName: (_ category: Category) -> String
     
-    @State private var isPulsing = false
-    @State private var isPressed = false
     @State private var scale: CGFloat = 0.0
-    
     var body: some View {
         VStack(spacing: 6) {
             ZStack {
@@ -32,8 +29,6 @@ struct MapAnnotationPin: View {
                         )
                     )
                     .frame(width: 50, height: 50)
-                    .scaleEffect(isPulsing ? 1.3 : 1.0)
-                    .opacity(isPulsing ? 0 : 1)
                 
                 Circle()
                     .fill(memory.category.color.opacity(0.25))
@@ -89,8 +84,7 @@ struct MapAnnotationPin: View {
                     .foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.4), radius: 2, x: 0, y: 1)
             }
-            .scaleEffect(isPressed ? 0.9 : 1.0)
-            
+        
 
             Text(memory.title)
                 .font(.caption)

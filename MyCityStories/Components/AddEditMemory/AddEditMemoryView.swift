@@ -27,6 +27,10 @@ struct AddEditMemoryView: View {
     let longitude: Double
     let isEditing: Bool
     
+
+    var onCompletion: (Bool, LocationMemory?) -> Void = { _, _ in }
+    
+    
     private var canSave: Bool {
         !title.trimmingCharacters(in: .whitespaces).isEmpty
     }
@@ -92,6 +96,7 @@ struct AddEditMemoryView: View {
             .alert("Discard Changes?", isPresented: $showingCancelAlert) {
                 Button("Keep Editing", role: .cancel) { }
                 Button("Discard", role: .destructive) {
+                    onCompletion(false, nil)
                     dismiss()
                 }
             } message: {
@@ -159,6 +164,7 @@ struct AddEditMemoryView: View {
         if hasChanges {
             showingCancelAlert = true
         } else {
+            onCompletion(false, nil)
             dismiss()
         }
     }
@@ -168,15 +174,19 @@ struct AddEditMemoryView: View {
         
         // Simulate save delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            // TODO: Implement save logic
-            print("Saving memory:")
-            print("Title: \(title)")
-            print("Note: \(note)")
-            print("Date: \(selectedDate)")
-            print("Category: \(selectedCategory)")
-            print("Location: \(latitude), \(longitude)")
-            
             isSaving = false
+            
+            let savedMemory = LocationMemory(
+                id: UUID(),
+                title: title,
+                note: note,
+                date: selectedDate,
+                latitude: latitude,
+                longitude: longitude,
+                category: selectedCategory
+            )
+            
+            onCompletion(true, savedMemory)
             dismiss()
         }
     }

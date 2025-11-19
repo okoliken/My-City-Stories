@@ -6,14 +6,31 @@
 //
 
 import Foundation
+import SwiftUI
+import MapKit
 
-struct Memory: Identifiable, Equatable {
-    let id = UUID()
+
+// Local model to satisfy the dummy data and map annotations
+struct LocationMemory: Identifiable {    
+    var id: UUID
     let title: String
-    let note: String
+    let note: String? // optional so `nil` is allowed
     let date: Date
-    let category: Category
-    let imageName: String? // For now, just store image name
     let latitude: Double
     let longitude: Double
+    let category: Category
+}
+
+struct CoordinateWrapper: Equatable {
+    let latitude: Double
+    let longitude: Double
+    
+    init(_ coordinate: CLLocationCoordinate2D) {
+        self.latitude = coordinate.latitude
+        self.longitude = coordinate.longitude
+    }
+    
+    var clCoordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
 }
