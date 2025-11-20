@@ -30,28 +30,38 @@ struct PhotoSection: View {
             } else {
                 HStack(spacing: 12) {
                     PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                        HStack {
-                            Image(systemName: "photo.on.rectangle")
-                            Text("Choose Photo")
+                        VStack(spacing: 16) {
+                            Image(systemName: "photo.on.rectangle.angled")
+                                .font(.system(size: 48))
+                                .foregroundColor(DesignTokens.Colors.buttonThemeColor)
+                            
+                            Text("Tap to choose a photo")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                         }
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.systemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .padding(.vertical, 40)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .strokeBorder(
+                                    DesignTokens.Colors.buttonThemeColor,
+                                    style: StrokeStyle(lineWidth: 4, dash: [8, 4])
+                                )
+                        )
                     }
-                    
-                    Button {
-                        showingCamera = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "camera")
-                            Text("Take Photo")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.systemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
+                    .buttonStyle(.plain)
+//                    Button {
+//                        showingCamera = true
+//                    } label: {
+//                        HStack {
+//                            Image(systemName: "camera")
+//                            Text("Take Photo")
+//                        }
+//                        .frame(maxWidth: .infinity)
+//                        .padding()
+//                        .background(DesignTokens.Colors.buttonThemeColor)
+//                        .clipShape(RoundedRectangle(cornerRadius: 12))
+//                    }
                 }
                 .padding(.horizontal)
             }

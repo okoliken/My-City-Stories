@@ -35,7 +35,7 @@ struct LocationInfo: View {
                 Spacer()
             }
             .padding()
-            .background(Color(.systemBackground))
+            .background(Color(.systemGray5))
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }
     }

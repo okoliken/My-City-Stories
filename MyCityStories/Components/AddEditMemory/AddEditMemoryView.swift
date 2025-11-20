@@ -42,7 +42,7 @@ struct AddEditMemoryView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: DesignTokens.Spacing.xl) {
+                VStack(spacing: DesignTokens.Spacing.xxl) {
                     // MARK: - Header Section
                     headerSection
                     
@@ -54,19 +54,24 @@ struct AddEditMemoryView: View {
                     )
                     
                     // MARK: - Form Content
-                    VStack(spacing: DesignTokens.Spacing.xl) {
+                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.xl) {
                         TitleField(title: $title)
                         NoteField(note: $note)
                         datePicker
                         CategoryPicker(selectedCategory: $selectedCategory)
                         LocationInfo(latitude: latitude, longitude: longitude)
+                        
+                        Button {
+                            
+                        } label: {
+                            Text("Save Memory")
+                        }
                     }
                     .padding(.horizontal)
                 }
                 .padding(.vertical, DesignTokens.Spacing.lg)
             }
-            .background(DesignTokens.Colors.background)
-            .navigationTitle(isEditing ? "Edit Memory" : "New Memory")
+            .navigationTitle(isEditing ? "Edit Memory" : "Save Memory")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -76,22 +81,25 @@ struct AddEditMemoryView: View {
                         Text("Cancel")
                             .fontWeight(.medium)
                     }
+                    
                 }
                 
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        saveMemory()
-                    } label: {
-                        if isSaving {
-                            ProgressView()
-                                .tint(.white)
-                        } else {
-                            Text("Save")
-                                .fontWeight(.semibold)
-                        }
-                    }
-                    .disabled(!canSave || isSaving)
-                }
+//                ToolbarItem(placement: .confirmationAction) {
+//                    Button {
+//                        saveMemory()
+//                    } label: {
+//                        if isSaving {
+//                            ProgressView()
+//                                .tint(.white)
+//                        } else {
+//                            Text("Save")
+//                                .font(.caption)
+//                                .fontWeight(.semibold)
+//                        }
+//                    }
+//                    .disabled(!canSave || isSaving)
+//                   
+//                }
             }
             .alert("Discard Changes?", isPresented: $showingCancelAlert) {
                 Button("Keep Editing", role: .cancel) { }
@@ -126,11 +134,11 @@ struct AddEditMemoryView: View {
             Text(isEditing ? "Update Your Memory" : "Create a New Memory")
                 .font(DesignTokens.Typography.title3)
                 .fontWeight(.bold)
-                .foregroundStyle(DesignTokens.Colors.textPrimary)
+                .foregroundStyle(DesignTokens.Colors.textColorTheme)
             
             Text("Preserve this moment in time")
                 .font(DesignTokens.Typography.subheadline)
-                .foregroundStyle(DesignTokens.Colors.textSecondary)
+                .foregroundStyle(DesignTokens.Colors.textColorTheme)
         }
         .padding(.top, DesignTokens.Spacing.xs)
     }
@@ -145,17 +153,10 @@ struct AddEditMemoryView: View {
                 "Select date",
                 selection: $selectedDate,
                 in: ...Date(),
-                displayedComponents: [.date]
+                displayedComponents: [.date, .hourAndMinute]
             )
-            .datePickerStyle(.graphical)
+            .datePickerStyle(.compact)
             .labelsHidden()
-            .padding(DesignTokens.Spacing.md)
-            .background(DesignTokens.Colors.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.md))
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.md)
-                    .stroke(Color(.systemGray6), lineWidth: 1)
-            )
         }
     }
     

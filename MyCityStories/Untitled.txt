@@ -14,7 +14,7 @@ Core Features & Requirements
     * Custom pin annotations with category colors
     * Tap-and-hold gesture to drop new pin at location -- DONE
     * Smooth zoom and pan interactions -- DONE
-    * "Center on user" button 
+    * "Center on user" button
  User Flow:
     1. User opens app → Map loads with current location -- DONE
     2. User sees existing memory pins scattered on map -- SWIFT DATA IMPLEMENTATION PENDING

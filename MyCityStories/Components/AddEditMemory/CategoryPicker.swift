@@ -12,9 +12,9 @@ struct CategoryPicker: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Category")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            Label("Category", systemImage: "chevron.2.circlepath.circle")
+                .sectionHeaderStyle()
+
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {

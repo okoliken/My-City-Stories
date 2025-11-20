@@ -66,6 +66,7 @@ struct MemoryMapView: View {
                             pointsOfInterest: .including([.publicTransport, .park]),
                             showsTraffic: false
                         ))
+            
                 .mapControlVisibility(.visible)
                 .gesture(
                     LongPressGesture(minimumDuration: 0.5)

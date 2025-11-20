@@ -55,6 +55,10 @@ struct TitleField: View {
                 .background(DesignTokens.Colors.cardBackground)
                 .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.md))
                 .animation(DesignTokens.Animation.quick, value: isFocused)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DesignTokens.Radius.md)
+                        .stroke(borderColor, lineWidth: isFocused ? 2 : 1)
+                )
                 .onChange(of: title) { oldValue, newValue in
                     if newValue.count > titleLimit {
                         title = String(newValue.prefix(titleLimit))
@@ -88,7 +92,7 @@ struct TitleField: View {
         } else if isNearLimit {
             return DesignTokens.Colors.warning
         } else {
-            return DesignTokens.Colors.textSecondary
+            return DesignTokens.Colors.textColorTheme
         }
     }
 }

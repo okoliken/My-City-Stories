@@ -16,14 +16,12 @@ struct DesignTokens {
         static let secondary = Color(.systemGray)
         static let accent = Color(red: 1.0, green: 0.4, blue: 0.6) // Coral pink
         
-        static let background = Color(.systemGroupedBackground)
-        static let cardBackground = Color(.systemBackground)
+        static let background = Color(.sheetTheme)
+        static let cardBackground = Color(.sheetTheme)
+        static let buttonThemeColor = Color(.buttonTheme)
         static let overlayBackground = Color.black.opacity(0.3)
         
-        static let textPrimary = Color.primary
-        static let textSecondary = Color.secondary
-        static let textTertiary = Color(.tertiaryLabel)
-        
+        static let textColorTheme = Color(.textTheme)
         static let success = Color.green
         static let warning = Color.orange
         static let error = Color.red
@@ -113,7 +111,7 @@ extension View {
         self
             .font(DesignTokens.Typography.subheadline)
             .fontWeight(.semibold)
-            .foregroundStyle(DesignTokens.Colors.textSecondary)
+            .foregroundStyle(DesignTokens.Colors.textColorTheme)
             .textCase(.uppercase)
             .tracking(0.5)
     }

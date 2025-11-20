@@ -30,7 +30,7 @@ struct NoteField: View {
                 
                 Text("Optional")
                     .font(DesignTokens.Typography.caption2)
-                    .foregroundStyle(DesignTokens.Colors.textTertiary)
+                    .foregroundStyle(DesignTokens.Colors.textColorTheme)
                     .padding(.horizontal, DesignTokens.Spacing.xs)
                     .padding(.vertical, DesignTokens.Spacing.xxs)
                     .background(
@@ -59,7 +59,7 @@ struct NoteField: View {
                 if note.isEmpty {
                     Text("Add details about this memory...")
                         .font(DesignTokens.Typography.body)
-                        .foregroundStyle(DesignTokens.Colors.textTertiary.opacity(0.6))
+                        .foregroundStyle(DesignTokens.Colors.textColorTheme.opacity(0.6))
                         .padding(.horizontal, 4) // TextEditor has ~4pt internal horizontal padding
                         .padding(.vertical, 8)   // TextEditor has ~8pt internal vertical padding
                         .padding(DesignTokens.Spacing.md) // Match outer padding
@@ -105,7 +105,7 @@ struct NoteField: View {
         } else if isNearLimit {
             return DesignTokens.Colors.warning
         } else {
-            return DesignTokens.Colors.textSecondary
+            return DesignTokens.Colors.textColorTheme
         }
     }
 }
