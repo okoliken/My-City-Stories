@@ -12,7 +12,7 @@ struct CategoryPicker: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("Category", systemImage: "chevron.2.circlepath.circle")
+            Text("Category")
                 .sectionHeaderStyle()
 
             
@@ -61,3 +61,4 @@ struct CategoryButton: View {
         .buttonStyle(.plain)
     }
 }
+

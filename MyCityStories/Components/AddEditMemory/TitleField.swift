@@ -29,7 +29,7 @@ struct TitleField: View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
             // Header
             HStack {
-                Label("Title", systemImage: "textformat")
+                Text("Title")
                     .sectionHeaderStyle()
                 
                 Spacer()
@@ -67,7 +67,7 @@ struct TitleField: View {
             
             // Error message
             if isError {
-                Label("Title cannot be empty", systemImage: "exclamationmark.circle.fill")
+                Text("Title cannot be empty")
                     .font(DesignTokens.Typography.caption)
                     .foregroundStyle(DesignTokens.Colors.error)
                     .transition(.move(edge: .top).combined(with: .opacity))
@@ -82,7 +82,7 @@ struct TitleField: View {
         } else if isFocused {
             return DesignTokens.Colors.primary
         } else {
-            return Color(.systemGray5)
+            return Color(.inputBorder)
         }
     }
     
@@ -96,3 +96,4 @@ struct TitleField: View {
         }
     }
 }
+

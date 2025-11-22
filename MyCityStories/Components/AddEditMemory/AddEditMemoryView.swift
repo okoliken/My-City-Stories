@@ -62,15 +62,23 @@ struct AddEditMemoryView: View {
                         LocationInfo(latitude: latitude, longitude: longitude)
                         
                         Button {
-                            
+                            // TODO: Hook up save action if needed
                         } label: {
-                            Text("Save Memory")
+                            Text("Save to memory")
+                                .font(DesignTokens.Typography.headline)
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, DesignTokens.Spacing.md)
                         }
+                        .background(DesignTokens.Colors.buttonThemeColor)
+                        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.xl))
+                        .shadow(color: DesignTokens.Shadow.small(), radius: 4, y: 2)
                     }
                     .padding(.horizontal)
                 }
                 .padding(.vertical, DesignTokens.Spacing.lg)
             }
+            .background(DesignTokens.Colors.cardBackground)
             .navigationTitle(isEditing ? "Edit Memory" : "Save Memory")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -146,7 +154,7 @@ struct AddEditMemoryView: View {
     // MARK: - Date Picker
     private var datePicker: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-            Label("Date", systemImage: "calendar")
+            Text("Date")
                 .sectionHeaderStyle()
             
             DatePicker(

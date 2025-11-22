@@ -33,7 +33,7 @@ struct PhotoSection: View {
                         VStack(spacing: 16) {
                             Image(systemName: "photo.on.rectangle.angled")
                                 .font(.system(size: 48))
-                                .foregroundColor(DesignTokens.Colors.buttonThemeColor)
+                              
                             
                             Text("Tap to choose a photo")
                                 .font(.subheadline)
@@ -44,7 +44,7 @@ struct PhotoSection: View {
                         .background(
                             RoundedRectangle(cornerRadius: 16)
                                 .strokeBorder(
-                                    DesignTokens.Colors.buttonThemeColor,
+                                    DesignTokens.Colors.cardStrokeColor,
                                     style: StrokeStyle(lineWidth: 4, dash: [8, 4])
                                 )
                         )

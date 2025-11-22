@@ -25,7 +25,7 @@ struct NoteField: View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
             // Header
             HStack(alignment: .center, spacing: DesignTokens.Spacing.xs) {
-                Label("Note", systemImage: "note.text")
+                Text("Note")
                     .sectionHeaderStyle()
                 
                 Text("Optional")

@@ -19,6 +19,7 @@ struct DesignTokens {
         static let background = Color(.sheetTheme)
         static let cardBackground = Color(.sheetTheme)
         static let buttonThemeColor = Color(.buttonTheme)
+        static let cardStrokeColor = Color(.strokeTheme)
         static let overlayBackground = Color.black.opacity(0.3)
         
         static let textColorTheme = Color(.textTheme)
