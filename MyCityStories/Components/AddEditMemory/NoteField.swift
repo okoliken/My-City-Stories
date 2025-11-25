@@ -21,6 +21,7 @@ struct NoteField: View {
         characterCount > Int(Double(noteLimit) * 0.8)
     }
     
+    
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
             // Header
@@ -81,12 +82,6 @@ struct NoteField: View {
             }
             .background(DesignTokens.Colors.cardBackground)
             .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.md))
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.md)
-                    .stroke(borderColor, lineWidth: isFocused ? 2 : 1)
-            )
-            .shadow(color: isFocused ? DesignTokens.Colors.primary.opacity(0.15) : .clear,
-                   radius: 8, y: 4)
             .animation(DesignTokens.Animation.quick, value: isFocused)
         }
     }
@@ -95,7 +90,7 @@ struct NoteField: View {
         if isFocused {
             return DesignTokens.Colors.primary
         } else {
-            return Color(.systemGray5)
+            return Color(.inputBorder)
         }
     }
     

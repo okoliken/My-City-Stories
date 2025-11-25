@@ -7,17 +7,20 @@
 
 import SwiftUI
 import PhotosUI
+import SwiftData
 
 struct AddEditMemoryView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     
     // MARK: - State Properties
     @State private var title: String = ""
     @State private var note: String = ""
     @State private var selectedDate: Date = Date()
     @State private var selectedCategory: Category = .other
-    @State private var selectedPhoto: PhotosPickerItem?
-    @State private var photoImage: Image?
+    @State private var selectedPhotos: [PhotosPickerItem] = []
+    @State private var photoImages: [UIImage] = []
+    
     @State private var showingCamera = false
     @State private var showingCancelAlert = false
     @State private var isSaving = false
@@ -26,9 +29,9 @@ struct AddEditMemoryView: View {
     let latitude: Double
     let longitude: Double
     let isEditing: Bool
+    var memory: LocationMemory? = nil
     
-
-    var onCompletion: (Bool, LocationMemory?) -> Void = { _, _ in }
+    var onCompletion: (Bool, LocalLocationMemory?) -> Void = { _, _ in }
     
     
     private var canSave: Bool {
@@ -36,7 +39,7 @@ struct AddEditMemoryView: View {
     }
     
     private var hasChanges: Bool {
-        !title.isEmpty || !note.isEmpty || photoImage != nil
+        !title.isEmpty || !note.isEmpty || !photoImages.isEmpty
     }
     
     var body: some View {
@@ -48,8 +51,8 @@ struct AddEditMemoryView: View {
                     
                     // MARK: - Photo Section
                     PhotoSection(
-                        photoImage: $photoImage,
-                        selectedPhoto: $selectedPhoto,
+                        photoImages: $photoImages,
+                        selectedPhotos: $selectedPhotos,
                         showingCamera: $showingCamera
                     )
                     
@@ -60,25 +63,11 @@ struct AddEditMemoryView: View {
                         datePicker
                         CategoryPicker(selectedCategory: $selectedCategory)
                         LocationInfo(latitude: latitude, longitude: longitude)
-                        
-                        Button {
-                            // TODO: Hook up save action if needed
-                        } label: {
-                            Text("Save to memory")
-                                .font(DesignTokens.Typography.headline)
-                                .foregroundStyle(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, DesignTokens.Spacing.md)
-                        }
-                        .background(DesignTokens.Colors.buttonThemeColor)
-                        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.xl))
-                        .shadow(color: DesignTokens.Shadow.small(), radius: 4, y: 2)
                     }
                     .padding(.horizontal)
                 }
                 .padding(.vertical, DesignTokens.Spacing.lg)
             }
-            .background(DesignTokens.Colors.cardBackground)
             .navigationTitle(isEditing ? "Edit Memory" : "Save Memory")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -87,27 +76,27 @@ struct AddEditMemoryView: View {
                         handleCancel()
                     } label: {
                         Text("Cancel")
-                            .fontWeight(.medium)
                     }
                     
                 }
                 
-//                ToolbarItem(placement: .confirmationAction) {
-//                    Button {
-//                        saveMemory()
-//                    } label: {
-//                        if isSaving {
-//                            ProgressView()
-//                                .tint(.white)
-//                        } else {
-//                            Text("Save")
-//                                .font(.caption)
-//                                .fontWeight(.semibold)
-//                        }
-//                    }
-//                    .disabled(!canSave || isSaving)
-//                   
-//                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        saveMemory()
+                    } label: {
+                        if isSaving {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundStyle(.primary)
+                           
+                        }
+                    }
+                    .disabled(!canSave || isSaving)
+                    
+                }
             }
             .alert("Discard Changes?", isPresented: $showingCancelAlert) {
                 Button("Keep Editing", role: .cancel) { }
@@ -117,6 +106,16 @@ struct AddEditMemoryView: View {
                 }
             } message: {
                 Text("You have unsaved changes. Are you sure you want to discard them?")
+            }
+            .onAppear {
+                // Pre-populate fields if editing existing memory
+                if let existingMemory = memory {
+                    title = existingMemory.title
+                    note = existingMemory.note ?? ""
+                    selectedDate = existingMemory.date
+                    selectedCategory = existingMemory.category
+                    photoImages = existingMemory.photos
+                }
             }
         }
     }
@@ -181,22 +180,48 @@ struct AddEditMemoryView: View {
     private func saveMemory() {
         isSaving = true
         
-        // Simulate save delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            isSaving = false
-            
-            let savedMemory = LocationMemory(
-                id: UUID(),
+        // Create or update memory in SwiftData
+        let memoryToSave: LocationMemory
+        if let existingMemory = memory {
+            // Update existing memory
+            existingMemory.title = title
+            existingMemory.note = note.isEmpty ? nil : note
+            existingMemory.date = selectedDate
+            existingMemory.latitude = latitude
+            existingMemory.longitude = longitude
+            existingMemory.category = selectedCategory
+            existingMemory.setPhotos(photoImages)
+            existingMemory.updateModifiedDate()
+            memoryToSave = existingMemory
+        } else {
+            // Create new memory
+            let newMemory = LocationMemory(
                 title: title,
-                note: note,
+                note: note.isEmpty ? nil : note,
                 date: selectedDate,
                 latitude: latitude,
                 longitude: longitude,
                 category: selectedCategory
             )
+            newMemory.setPhotos(photoImages)
+            modelContext.insert(newMemory)
+            memoryToSave = newMemory
+        }
+        
+        // Save to database
+        do {
+            try modelContext.save()
+            isSaving = false
             
-            onCompletion(true, savedMemory)
+            // Convert to LocalLocationMemory for callback compatibility
+            let locationMemory = LocalLocationMemory(from: memoryToSave)
+            onCompletion(true, locationMemory)
             dismiss()
+        } catch {
+            isSaving = false
+            print("Failed to save memory: \(error)")
+            // Still call completion but with saved: false
+            onCompletion(false, nil)
         }
     }
 }

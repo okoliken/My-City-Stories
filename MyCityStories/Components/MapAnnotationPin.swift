@@ -110,21 +110,6 @@ struct MapAnnotationPin: View {
                             )
                     }
                 )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color.white.opacity(0.6),
-                                    Color.white.opacity(0.2)
-                                ]),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 1
-                        )
-                )
-                .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
         }
         .scaleEffect(scale)
         .animation(.bouncy, value: scale)

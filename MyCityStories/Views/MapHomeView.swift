@@ -8,19 +8,21 @@
 
 import SwiftUI
 import MapKit
-
-
+import SwiftData
 
 
 struct MemoryMapView: View {
+    @Query(sort: \LocationMemory.createdDate, order: .reverse) private var memories: [LocationMemory]
     @State private var openNewpinSheet: Bool = false
     @State var showBottomMapNavigationSheet: Bool = true
     @State var selectedMemoryCoordinates: CoordinateWrapper? = nil
-    @State private var memories: [LocationMemory] = []
-    @State private var pendingMemoryID: UUID? = nil
-    @State private var pendingWasSaved: Bool = false
+    @State var searchText: String = ""
     @State private var coordinator = SheetCoordinator<MemorySheet>()
     
+    let allDetents: Set<PresentationDetent> = [.height(70), .height(350), .large]
+    @State var selectedDetent: PresentationDetent = .height(350)
+    
+    @State var sheetHeight: CGFloat = 0
     @State private var position: MapCameraPosition = .region(
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(
@@ -34,36 +36,29 @@ struct MemoryMapView: View {
         )
     )
     
-    
-    
-    func saveMemory(memory: LocationMemory?, saved: Bool) {
-        if !saved, let id = pendingMemoryID {
-            memories.removeAll { $0.id == id }
-            pendingMemoryID = nil
-        } else if saved {
-            pendingMemoryID = nil
-            let newMemoryId = memory?.id
-            if let memory = memory, let index = memories.firstIndex(where: { $0.id == newMemoryId }) {
-                memories[index] = memory
-            } else if let memory  {
-                memories.append(memory)
-            }
-        }
+    func createMemoryDraft(at coordinate: CLLocationCoordinate2D) {
+        selectedMemoryCoordinates = CoordinateWrapper(coordinate)
     }
     
-    func createMemoryDraft(at coordinate: CLLocationCoordinate2D) {
-        let newMemory = LocationMemory(
-            id: UUID(),
-            title: "",
-            note: "",
-            date: Date(),
-            latitude: coordinate.latitude,
-            longitude: coordinate.longitude,
-            category: .other
-        )
-        memories.append(newMemory)
-        pendingMemoryID = newMemory.id
-        selectedMemoryCoordinates = CoordinateWrapper(coordinate)
+    @ViewBuilder
+    func BottomMapNavigationFloatingBar() -> some View {
+        VStack(spacing: 20){
+            Button {
+                
+            } label: {
+                Image(systemName: "car.fill")
+            }
+            Button {
+                
+            } label: {
+                Image(systemName: "location")
+            }
+        }
+        .font(.system(size: 24, weight: .bold, design: .default))
+        .foregroundStyle(.primary)
+        .padding(.vertical, 20)
+        .padding(.horizontal, 10)
+        .glassEffect(.regular, in: .capsule)
     }
     
     var body: some View {
@@ -71,22 +66,16 @@ struct MemoryMapView: View {
             MapReader { proxy in
                 Map(position: $position) {
                     ForEach(memories, id: \.id) { memory in
-                        let coordinate = CLLocationCoordinate2D(
-                            latitude: memory.latitude,
-                            longitude: memory.longitude
-                        )
+                        let coordinate = memory.coordinate
                         Annotation(
                             memory.title,
                             coordinate: coordinate
                         ) {
-                            MapAnnotationPin(
-                                memory: memory
-                            ) { selectedLocationMemory in
-                                iconName(
-                                    for: selectedLocationMemory
-                                )
-                            }
-                            
+                            AnnotationPinButton(
+                                memory: memory,
+                                iconName: iconName(for:),
+                                coordinator: coordinator
+                            )
                         }
                         .annotationTitles(.hidden)
                         
@@ -131,30 +120,30 @@ struct MemoryMapView: View {
                     if let coord = newValue {
                         let context = MemorySheetContext(
                             coordinates: coord,
-                            memory: nil,
-                            onSave: { saved, memory in
-                                pendingWasSaved = saved
-                                self.saveMemory(memory: memory, saved: saved)
-                            }
+                            memory: nil
                         )
                         coordinator.presentSheet(.memoryForm, context: context)
                     }
                 }
-                .onChange(of: coordinator.currentSheet) { oldValue, newValue in
-                    if newValue == nil && oldValue != nil {
-                        if let id = pendingMemoryID, !pendingWasSaved {
-                            memories.removeAll { $0.id == id }
-                            pendingMemoryID = nil
-                        }
-                    }
-                }
                 .sheet(isPresented: $showBottomMapNavigationSheet) {
                     BottomMapNavigationSheet(coordinator: coordinator)
-                        .presentationDetents([.height(70), .height(350), .large])
+                        .presentationDetents(allDetents, selection: $selectedDetent)
                         .presentationBackgroundInteraction(.enabled)
                         .presentationDragIndicator(.visible)
                         .interactiveDismissDisabled()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .sheetCoordinating(coordinator: coordinator)
+                        .onGeometryChange(for: CGFloat.self) {
+                            max(min($0.size.height, 350), 0)
+                        } action: { newValue in
+                            sheetHeight = newValue
+                        }
+                        
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    BottomMapNavigationFloatingBar()
+                        .padding(.trailing, 15)
+                        .offset(y: -sheetHeight)
                 }
                 
             }
@@ -168,25 +157,96 @@ struct MemoryMapView: View {
             case .friends: return "person.2.fill"
             case .travel: return "airplane"
             case .work: return "briefcase.fill"
-            case .other: return "mappin"
+            case .family: return "house.fill"
+            case .entertainment: return "tv.fill"
+            case .fitness: return "figure.run"
+            case .shopping: return "cart.fill"
+            case .nature: return "leaf.fill"
+            case .culture: return "building.columns.fill"
+            case .nightlife: return "moon.stars.fill"
+            case .education: return "book.fill"
+            case .health: return "heart.fill"
+            case .adventure: return "figure.hiking"
+            case .relaxation: return "sun.max.fill"
+            case .pets: return "pawprint.fill"
+            case .photography: return "camera.fill"
+            case .music: return "music.note"
+            case .art: return "paintpalette.fill"
+            case .sports: return "sportscourt.fill"
+            case .other: return "star.fill"
         }
     }
-    
-    
 }
 
 
-struct BottomMapNavigationSheet: View {
+// MARK: - Annotation Pin Button Wrapper
+private struct AnnotationPinButton: View {
+    let memory: LocationMemory
+    let iconName: (Category) -> String
     let coordinator: SheetCoordinator<MemorySheet>
+    
+    @State private var triggerWiggle = false
     
     var body: some View {
         Button {
-            print("Map settings placeholder")
-            coordinator.presentSheet(.memoryDetail, context: MemorySheetContext(coordinates: nil, memory: nil, onSave: nil))
+            // Trigger wiggle animation
+            triggerWiggle.toggle()
+            
+            // Small delay to let wiggle start, then open sheet
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                let context = MemorySheetContext(
+                    coordinates: nil,
+                    memory: memory,
+                    onSave: nil
+                )
+                coordinator.presentSheet(.memoryDetail, context: context)
+            }
         } label: {
-            Text("Hello")
+            MapAnnotationPin(
+                memory: memory,
+                iconName: iconName,
+            )
         }
-        
+        .buttonStyle(.plain)
+    }
+}
+
+struct BottomMapNavigationSheet: View {
+    let coordinator: SheetCoordinator<MemorySheet>
+    @State var searchText: String = ""
+    
+    var body: some View {
+        ScrollView(.vertical){
+            
+        }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            VStack (alignment: .leading) {
+                
+                HStack {
+                    ZStack(alignment: .leading) {
+                        TextField("Search maps" ,text: $searchText)
+                            .padding(.vertical, 8)
+                            .padding(.leading, 32)
+                            .fontWeight(.medium)
+                            .background(Color.gray.opacity(0.3), in: .capsule)
+                        
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.gray)
+                            .fontWeight(.bold)
+                            .padding(8)
+                    }
+                    Button {
+                        
+                    } label: {
+                        Circle()
+                            .fill(Color.inputBG)
+                            .frame(width: 35, height: 35)
+                    }
+                }
+                
+            }
+            .padding(18)
+        }
     }
 }
 
@@ -195,3 +255,4 @@ struct BottomMapNavigationSheet: View {
         MemoryMapView()
     }
 }
+

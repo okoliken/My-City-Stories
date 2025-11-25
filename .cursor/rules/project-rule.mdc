@@ -1,0 +1,118 @@
+---
+description: when working on a new view or feature, always reference this file
+alwaysApply: false
+---
+# My City Stories - iOS App
+
+You are an expert iOS developer helping build a location-based memory journal app using SwiftUI and MapKit. this is largely inspired
+by apple map app so we are drawing ideas from there.
+
+## Project Context
+- **App**: Users pin memories to map locations with photos and notes
+- **iOS Target**: iOS 17.0+
+- **UI Framework**: SwiftUI (UIKit for MapKit integration where needed)
+- **Data Persistence**: SwiftData
+- **Architecture**: MVVM
+
+## Project Structure
+```
+MyCityStories/
+├── Models/
+│   ├── Memory.swift
+│   └── Category.swift
+├── Views/
+│   ├── MapView.swift
+│   ├── MemoryDetailView.swift
+│   ├── AddEditMemoryView.swift
+│   └── MemoryListView.swift
+├── ViewModels/
+│   ├── MapViewModel.swift
+│   └── MemoryListViewModel.swift
+├── Services/
+│   ├── LocationManager.swift
+│   ├── DataManager.swift
+│   └── PhotoManager.swift
+└── Utilities/
+    └── Extensions.swift
+```
+
+## Data Model
+```swift
+@Model
+class Memory {
+    var id: UUID
+    var title: String          // Required, max 50 chars
+    var note: String?          // Optional, max 500 chars
+    var date: Date
+    var latitude: Double
+    var longitude: Double
+    var category: Category
+    @Attribute(.externalStorage) var photoData: Data?  // Max 1MB
+    var createdAt: Date
+    var modifiedAt: Date
+}
+
+enum Category: String, Codable, CaseIterable {
+    case food, friends, travel, work, other
+}
+```
+
+## Code Standards
+
+### MVVM Rules
+- **Models**: Pure data, no business logic
+- **Views**: UI only, bind to ViewModel via @StateObject or @ObservedObject
+- **ViewModels**: Business logic, @Published properties, @MainActor
+- **Services**: Singleton managers for location, data, photos
+
+### SwiftUI Patterns
+- Use `@StateObject` for ViewModels created in the view
+- Use `@ObservedObject` for ViewModels passed in
+- Use `@Environment(\.modelContext)` for SwiftData access
+- Extract subviews when a view exceeds ~100 lines
+- Prefer `async/await` over Combine for async operations
+
+### Naming Conventions
+- ViewModels: `MapViewModel`, `MemoryListViewModel`
+- Services: `LocationManager`, `PhotoManager`
+- Views: `MapView`, `MemoryDetailView`
+- Use descriptive names, avoid abbreviations
+
+### MapKit Guidelines
+- Use SwiftUI `Map` view with `MapContentBuilder`
+- Custom `Annotation` for memory pins
+- Color-code pins by category
+- Use `CLLocationManager` wrapped in `LocationManager` service
+- Handle all permission states (notDetermined, denied, authorized)
+
+## Validation Rules
+- Title: Required, 1-50 characters, trim whitespace
+- Note: Optional, max 500 characters
+- Photo: Compress to max 1MB using `UIImage.jpegData(compressionQuality:)`
+- Show confirmation before cancel if form has data
+
+## Required Info.plist Keys
+```xml
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>To show your location and save memories to places you visit</string>
+<key>NSCameraUsageDescription</key>
+<string>To take photos for your memories</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>To add photos from your library to memories</string>
+```
+
+## Error Handling
+- Wrap async calls in do/catch
+- Show user-friendly alerts for errors
+- Handle location permission denial with fallback UI
+- Handle missing/deleted photos gracefully
+- Always confirm before delete operations
+
+## When Generating Code
+1. Follow MVVM strictly—no business logic in Views
+2. Use Swift concurrency (async/await, @MainActor)
+3. Add MARK comments for code organization
+4. Include error handling for all failable operations
+5. Make UI responsive with loading states
+6. Support Dark Mode
+7. Add accessibility labels to interactive elements
