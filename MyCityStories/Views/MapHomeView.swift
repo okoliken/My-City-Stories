@@ -19,7 +19,7 @@ struct MemoryMapView: View {
     @State var searchText: String = ""
     @State private var coordinator = SheetCoordinator<MemorySheet>()
     
-    let allDetents: Set<PresentationDetent> = [.height(70), .height(350), .large]
+    let allDetents: Set<PresentationDetent> = [.height(80), .height(350), .large]
     @State var selectedDetent: PresentationDetent = .height(350)
     
     @State var sheetHeight: CGFloat = 0
@@ -42,25 +42,44 @@ struct MemoryMapView: View {
     
     @ViewBuilder
     func BottomMapNavigationFloatingBar() -> some View {
-        VStack(spacing: 20){
+        VStack(spacing: 20) {
             Button {
                 
             } label: {
-                Image(systemName: "car.fill")
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(width: 36, height: 36)
+                    .background(
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                    )
+                    .overlay(
+                        Circle()
+                            .stroke(.primary.opacity(0.1), lineWidth: 1)
+                    )
             }
+            .buttonStyle(.plain)
+            
             Button {
                 
             } label: {
-                Image(systemName: "location")
+                Image(systemName: "location.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(width: 36, height: 36)
+                    .background(
+                        Circle()
+                            .fill(.blue.gradient)
+                    )
+                    .foregroundStyle(.white)
+                    .shadow(color: .blue.opacity(0.3), radius: 8, x: 0, y: 4)
             }
+            .buttonStyle(.plain)
         }
-        .font(.system(size: 24, weight: .bold, design: .default))
-        .foregroundStyle(.primary)
-        .padding(.vertical, 20)
-        .padding(.horizontal, 10)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 8)
         .glassEffect(.regular, in: .capsule)
+        .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
     }
-    
     var body: some View {
         ZStack {
             MapReader { proxy in
@@ -82,7 +101,6 @@ struct MemoryMapView: View {
                     }
                 }
                 .mapControls {
-                    MapUserLocationButton()
                     MapCompass()
                     MapScaleView()
                 }
@@ -141,6 +159,7 @@ struct MemoryMapView: View {
                         
                 }
                 .overlay(alignment: .bottomTrailing) {
+                    
                     BottomMapNavigationFloatingBar()
                         .padding(.trailing, 15)
                         .offset(y: -sheetHeight)
