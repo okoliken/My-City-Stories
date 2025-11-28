@@ -23,6 +23,7 @@ final class LocationMemory {
     var photoData: [Data]?
     var createdDate: Date
     var modifiedDate: Date
+    var isFavorite: Bool = false
     
     init(
         id: UUID = UUID(),
@@ -34,7 +35,8 @@ final class LocationMemory {
         category: Category,
         photoData: [Data]? = nil,
         createdDate: Date = Date(),
-        modifiedDate: Date = Date()
+        modifiedDate: Date = Date(),
+        isFavorite: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -51,6 +53,7 @@ final class LocationMemory {
         }
         self.createdDate = createdDate
         self.modifiedDate = modifiedDate
+        self.isFavorite = isFavorite
     }
     
     // MARK: - Computed Properties

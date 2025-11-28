@@ -5,13 +5,14 @@
 //  Created by Jeffery Okoli on 21/11/2025.
 //
 import SwiftUI
+import MapKit
 
 protocol SheetEnum: Identifiable {
     associatedtype Body: View
     associatedtype Context
     
     @ViewBuilder
-    func view(coordinator: SheetCoordinator<Self>, context: Context) -> Body
+    func view(coordinator: SheetCoordinator<Self>, context: Context?) -> Body
 }
 
 
@@ -29,33 +30,36 @@ enum MemorySheet: String, SheetEnum {
     var id: String { rawValue }
     
     @ViewBuilder
-    func view(coordinator: SheetCoordinator<MemorySheet>, context: MemorySheetContext) -> some View {
-        switch self {
-            case .memoryForm:
-                if let coord = context.coordinates {
-                    AddEditMemoryView(
-                        latitude: coord.latitude,
-                        longitude: coord.longitude,
-                        isEditing: context.memory != nil,
-                        memory: context.memory,
-                        onCompletion: { saved, memory in
-                            context.onSave?(saved, memory)
-                        }
-                    )
-                    .presentationDetents([.height(350), .large])
-                    .presentationDragIndicator(.visible)
-                }
-            case .memoryDetail:
-                if let memory = context.memory {
-                    MemoryDetailsView(memory: memory)
-                        .presentationDetents([.height(500), .large])
+    func view(coordinator: SheetCoordinator<MemorySheet>, context: MemorySheetContext?) -> some View {
+        ThemeSwitcher {
+            switch self {
+                case .memoryForm:
+                    if let context = context, let coord = context.coordinates {
+                        AddEditMemoryView(
+                            latitude: coord.latitude,
+                            longitude: coord.longitude,
+                            isEditing: context.memory != nil,
+                            memory: context.memory,
+                            onCompletion: { saved, memory in
+                                context.onSave?(saved, memory)
+                            }
+                        )
+                        .presentationDetents([.height(350), .large])
                         .presentationDragIndicator(.visible)
-                        .presentationBackground(Color.inputBG)
-                }
-            case .mapSettings:
-                Text("Map settings placeholder")
-                    .presentationDetents([.height(70), .height(350), .large])
-                    .presentationDragIndicator(.visible)
+                        .presentationBackgroundInteraction(.enabled)
+                    }
+                case .memoryDetail:
+                    if let context = context, let memory = context.memory {
+                        MemoryDetailsView(memory: memory)
+                            .presentationDetents([.height(500), .large])
+                            .presentationDragIndicator(.visible)
+                            .presentationBackgroundInteraction(.enabled)
+                    }
+                case .mapSettings:
+                    MapSettingsView()
+                        .presentationDetents([.medium])
+                        .presentationDragIndicator(.visible)
+            }
         }
     }
 }
@@ -69,6 +73,7 @@ final class SheetCoordinator<Sheet: SheetEnum> {
     
     @MainActor
     func presentSheet(_ sheet: Sheet, context: Sheet.Context? = nil) {
+        if sheetStack.contains(where: { $0.sheet.id == sheet.id }) { return }
         sheetStack.append((sheet, context))
         
         if sheetStack.count == 1 {
@@ -99,7 +104,11 @@ struct SheetCoordinating<Sheet: SheetEnum>: ViewModifier {
             .sheet(item: $coordinator.currentSheet, onDismiss: {
                 coordinator.sheetDismissed()
             }, content: { sheet in
-                sheet.view(coordinator: coordinator, context: coordinator.context!)
+                if let context = coordinator.context {
+                    sheet.view(coordinator: coordinator, context: context)
+                } else {
+                    sheet.view(coordinator: coordinator, context: nil)
+                }
             })
     }
 }

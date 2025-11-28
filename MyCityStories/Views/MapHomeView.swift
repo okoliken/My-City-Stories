@@ -26,8 +26,8 @@ struct MemoryMapView: View {
     @State private var position: MapCameraPosition = .region(
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(
-                latitude: 37.7749,
-                longitude: -122.4194
+                latitude: 6.614378,
+                longitude: 3.357768
             ),
             span: MKCoordinateSpan(
                 latitudeDelta: 0.01,
@@ -44,7 +44,7 @@ struct MemoryMapView: View {
     func BottomMapNavigationFloatingBar() -> some View {
         VStack(spacing: 20) {
             Button {
-                
+                coordinator.presentSheet(.mapSettings, context: nil)
             } label: {
                 Image(systemName: "gearshape.fill")
                     .font(.system(size: 16, weight: .semibold))
@@ -144,22 +144,26 @@ struct MemoryMapView: View {
                     }
                 }
                 .sheet(isPresented: $showBottomMapNavigationSheet) {
-                    BottomMapNavigationSheet(coordinator: coordinator)
+                    ThemeSwitcher {
+                        BottomMapNavigationSheet(
+                            coordinator: coordinator,
+                            selectedDetent: $selectedDetent
+                        )
                         .presentationDetents(allDetents, selection: $selectedDetent)
-                        .presentationBackgroundInteraction(.enabled)
-                        .presentationDragIndicator(.visible)
-                        .interactiveDismissDisabled()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .sheetCoordinating(coordinator: coordinator)
-                        .onGeometryChange(for: CGFloat.self) {
-                            max(min($0.size.height, 350), 0)
-                        } action: { newValue in
-                            sheetHeight = newValue
-                        }
-                        
+                            .presentationBackgroundInteraction(.enabled)
+                            .presentationDragIndicator(.visible)
+                            .interactiveDismissDisabled()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .sheetCoordinating(coordinator: coordinator)
+                            .onGeometryChange(for: CGFloat.self) {
+                                max(min($0.size.height, 350), 0)
+                            } action: { newValue in
+                                sheetHeight = newValue
+                            }
+                    }
+                    
                 }
                 .overlay(alignment: .bottomTrailing) {
-                    
                     BottomMapNavigationFloatingBar()
                         .padding(.trailing, 15)
                         .offset(y: -sheetHeight)
@@ -193,78 +197,6 @@ struct MemoryMapView: View {
             case .art: return "paintpalette.fill"
             case .sports: return "sportscourt.fill"
             case .other: return "star.fill"
-        }
-    }
-}
-
-
-// MARK: - Annotation Pin Button Wrapper
-private struct AnnotationPinButton: View {
-    let memory: LocationMemory
-    let iconName: (Category) -> String
-    let coordinator: SheetCoordinator<MemorySheet>
-    
-    @State private var triggerWiggle = false
-    
-    var body: some View {
-        Button {
-            // Trigger wiggle animation
-            triggerWiggle.toggle()
-            
-            // Small delay to let wiggle start, then open sheet
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                let context = MemorySheetContext(
-                    coordinates: nil,
-                    memory: memory,
-                    onSave: nil
-                )
-                coordinator.presentSheet(.memoryDetail, context: context)
-            }
-        } label: {
-            MapAnnotationPin(
-                memory: memory,
-                iconName: iconName,
-            )
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-struct BottomMapNavigationSheet: View {
-    let coordinator: SheetCoordinator<MemorySheet>
-    @State var searchText: String = ""
-    
-    var body: some View {
-        ScrollView(.vertical){
-            
-        }
-        .safeAreaInset(edge: .top, spacing: 0) {
-            VStack (alignment: .leading) {
-                
-                HStack {
-                    ZStack(alignment: .leading) {
-                        TextField("Search maps" ,text: $searchText)
-                            .padding(.vertical, 8)
-                            .padding(.leading, 32)
-                            .fontWeight(.medium)
-                            .background(Color.gray.opacity(0.3), in: .capsule)
-                        
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.gray)
-                            .fontWeight(.bold)
-                            .padding(8)
-                    }
-                    Button {
-                        
-                    } label: {
-                        Circle()
-                            .fill(Color.inputBG)
-                            .frame(width: 35, height: 35)
-                    }
-                }
-                
-            }
-            .padding(18)
         }
     }
 }

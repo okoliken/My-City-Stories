@@ -12,71 +12,30 @@ import MapKit
 struct MemoryDetailsView: View {
     let memory: LocationMemory
     @Environment(\.dismiss) private var dismiss
-    
+    @State private var currentPhotoIndex: Int = 0
     
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: DesignTokens.Spacing.xl) {
-                    // MARK: - Title (First, Centered)
-                    Text(memory.title)
-                        .font(DesignTokens.Typography.title1)
-                        .fontWeight(.bold)
-                        .foregroundStyle(DesignTokens.Colors.textColorTheme)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                        .padding(.top, DesignTokens.Spacing.lg)
+                    // MARK: - Title Section
+                    titleSection
                     
                     // MARK: - Photos Section
                     if !memory.photos.isEmpty {
                         photoSection
                     }
                     
-                    // MARK: - Details Section
-                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
-                        // Date
-                        detailRow(
-                            icon: "calendar",
-                            title: "Date",
-                            value: formattedDate(memory.date)
-                        )
-                        
-                        // Category
-                        detailRow(
-                            icon: memory.category.icon,
-                            title: "Category",
-                            value: memory.category.rawValue,
-                            categoryColor: memory.category.color
-                        )
-                        
-                        // Location
-                        detailRow(
-                            icon: "mappin.circle.fill",
-                            title: "Location",
-                            value: formattedLocation(memory.latitude, memory.longitude)
-                        )
-                        
-                        // Note (if available)
-                        if let note = memory.note, !note.isEmpty {
-                            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-                                Text("Note")
-                                    .sectionHeaderStyle()
-                                
-                                Text(note)
-                                    .font(DesignTokens.Typography.body)
-                                    .foregroundStyle(DesignTokens.Colors.textColorTheme)
-                                    .padding(DesignTokens.Spacing.md)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(DesignTokens.Colors.cardBackground)
-                                    .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.md))
-                            }
-                            .padding(.horizontal)
-                        }
+                    // MARK: - Details Cards
+                    detailsSection
+                    
+                    // MARK: - Note Section
+                    if let note = memory.note, !note.isEmpty {
+                        noteSection(note)
                     }
-                    .padding(.bottom, DesignTokens.Spacing.xl)
                 }
+                .padding(.bottom, DesignTokens.Spacing.xxl)
             }
-            .background(DesignTokens.Colors.cardBackground)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -92,51 +51,207 @@ struct MemoryDetailsView: View {
         }
     }
     
+    // MARK: - Title Section
+    private var titleSection: some View {
+        VStack(spacing: DesignTokens.Spacing.sm) {
+            Text(memory.title)
+                .font(DesignTokens.Typography.title1)
+                .fontWeight(.bold)
+                .foregroundStyle(DesignTokens.Colors.textColorTheme)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, DesignTokens.Spacing.lg)
+                .padding(.top, DesignTokens.Spacing.lg)
+            
+            // Category Badge
+            categoryBadge
+        }
+    }
+    
+    // MARK: - Category Badge
+    private var categoryBadge: some View {
+        HStack(spacing: DesignTokens.Spacing.xs) {
+            Image(systemName: memory.category.icon)
+                .font(.system(size: 12, weight: .semibold))
+            Text(memory.category.rawValue)
+                .font(.system(size: 13, weight: .semibold))
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, DesignTokens.Spacing.md)
+        .padding(.vertical, DesignTokens.Spacing.xs)
+        .background(
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            memory.category.color,
+                            memory.category.color.opacity(0.8)
+                        ]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+        )
+        .shadow(color: memory.category.color.opacity(0.3), radius: 8, x: 0, y: 4)
+    }
+    
     // MARK: - Photo Section
     private var photoSection: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: DesignTokens.Spacing.md) {
+        VStack(spacing: DesignTokens.Spacing.sm) {
+            TabView(selection: $currentPhotoIndex) {
                 ForEach(Array(memory.photos.enumerated()), id: \.offset) { index, photo in
                     Image(uiImage: photo)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(width: 280, height: 180)
-                        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.md))
+                        .frame(height: 240)
                         .clipped()
+                        .tag(index)
                 }
             }
+            .tabViewStyle(.page)
+            .frame(height: 240)
+            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.lg))
             .padding(.horizontal, DesignTokens.Spacing.md)
+            
+            // Photo counter
+            if memory.photos.count > 1 {
+                Text("\(currentPhotoIndex + 1) of \(memory.photos.count)")
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
-        .frame(height: 180)
     }
     
-    // MARK: - Detail Row
-    private func detailRow(
+    // MARK: - Details Section
+    private var detailsSection: some View {
+        VStack(spacing: DesignTokens.Spacing.md) {
+            // Date Card
+            detailCard(
+                icon: "calendar",
+                iconColor: DesignTokens.Colors.primary,
+                title: "Date",
+                value: formattedDate(memory.date)
+            )
+            
+            // Location Card
+            detailCard(
+                icon: "mappin.circle.fill",
+                iconColor: .red,
+                title: "Location",
+                value: formattedLocation(memory.latitude, memory.longitude)
+            )
+        }
+        .padding(.horizontal, DesignTokens.Spacing.md)
+    }
+    
+    // MARK: - Detail Card
+    private func detailCard(
         icon: String,
+        iconColor: Color,
         title: String,
-        value: String,
-        categoryColor: Color? = nil
+        value: String
     ) -> some View {
         HStack(spacing: DesignTokens.Spacing.md) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(categoryColor ?? DesignTokens.Colors.primary)
-                .frame(width: 24)
+            // Icon with background
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                iconColor.opacity(0.2),
+                                iconColor.opacity(0.1)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(iconColor)
+            }
             
+            // Content
             VStack(alignment: .leading, spacing: DesignTokens.Spacing.xxs) {
                 Text(title)
                     .font(DesignTokens.Typography.caption)
                     .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                    .tracking(0.5)
                 
                 Text(value)
                     .font(DesignTokens.Typography.body)
+                    .fontWeight(.medium)
                     .foregroundStyle(DesignTokens.Colors.textColorTheme)
             }
             
             Spacer()
         }
-        .padding(.horizontal)
-        .padding(.vertical, DesignTokens.Spacing.sm)
+        .padding(DesignTokens.Spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DesignTokens.Radius.md)
+                .fill(.ultraThinMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DesignTokens.Radius.md)
+                .strokeBorder(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.white.opacity(0.2),
+                            Color.white.opacity(0.05)
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        )
+        .shadow(color: DesignTokens.Shadow.small(), radius: 4, y: 2)
+    }
+    
+    // MARK: - Note Section
+    private func noteSection(_ note: String) -> some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+            HStack {
+                Image(systemName: "note.text")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(DesignTokens.Colors.primary)
+                
+                Text("Note")
+                    .font(DesignTokens.Typography.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(DesignTokens.Colors.textColorTheme)
+                    .textCase(.uppercase)
+                    .tracking(0.5)
+            }
+            
+            Text(note)
+                .font(DesignTokens.Typography.body)
+                .foregroundStyle(DesignTokens.Colors.textColorTheme)
+                .lineSpacing(4)
+                .padding(DesignTokens.Spacing.md)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: DesignTokens.Radius.md)
+                        .fill(.ultraThinMaterial)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: DesignTokens.Radius.md)
+                        .strokeBorder(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.white.opacity(0.2),
+                                    Color.white.opacity(0.05)
+                                ]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+                .shadow(color: DesignTokens.Shadow.small(), radius: 4, y: 2)
+        }
+        .padding(.horizontal, DesignTokens.Spacing.md)
     }
     
     // MARK: - Helpers
@@ -151,4 +266,3 @@ struct MemoryDetailsView: View {
         String(format: "%.4f, %.4f", latitude, longitude)
     }
 }
-

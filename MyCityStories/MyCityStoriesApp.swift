@@ -8,6 +8,32 @@
 import SwiftUI
 import SwiftData
 
+enum AppTheme: String, CaseIterable {
+    case light = "Light"
+    case dark = "Dark"
+    case systemDefault = "Default"
+    
+    var colorScheme: ColorScheme? {
+        switch self {
+            case .light: return .light
+            case .dark: return .dark
+            case .systemDefault: return nil
+        }
+    }
+}
+
+struct ThemeSwitcher<Content: View>: View {
+    @ViewBuilder var content: Content
+    @AppStorage("AppTheme") var theme: AppTheme = .systemDefault
+    
+    var body: some View {
+        content
+            .preferredColorScheme(theme.colorScheme)
+    }
+}
+
+
+
 @main
 struct MyCityStoriesApp: App {
     var sharedModelContainer: ModelContainer = {
@@ -25,7 +51,9 @@ struct MyCityStoriesApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ThemeSwitcher {
+                ContentView()
+            }
         }
         .modelContainer(sharedModelContainer)
     }
