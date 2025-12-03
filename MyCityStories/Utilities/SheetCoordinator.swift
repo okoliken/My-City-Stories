@@ -1,5 +1,5 @@
 //
-//  SheetCoordinator.swift.swift
+//  SheetCoordinator.swift
 //  MyCityStories
 //
 //  Created by Jeffery Okoli on 21/11/2025.
@@ -26,6 +26,7 @@ enum MemorySheet: String, SheetEnum {
     case memoryForm
     case memoryDetail
     case mapSettings
+    case memoriesList
     
     var id: String { rawValue }
     
@@ -44,20 +45,22 @@ enum MemorySheet: String, SheetEnum {
                                 context.onSave?(saved, memory)
                             }
                         )
-                        .presentationDetents([.height(350), .large])
+                        .presentationDetents([.large])
                         .presentationDragIndicator(.visible)
-                        .presentationBackgroundInteraction(.enabled)
                     }
                 case .memoryDetail:
                     if let context = context, let memory = context.memory {
                         MemoryDetailsView(memory: memory)
-                            .presentationDetents([.height(500), .large])
+                            .presentationDetents([.large])
                             .presentationDragIndicator(.visible)
-                            .presentationBackgroundInteraction(.enabled)
                     }
                 case .mapSettings:
                     MapSettingsView()
                         .presentationDetents([.medium])
+                        .presentationDragIndicator(.visible)
+                case .memoriesList:
+                    MemoriesListView(coordinator: coordinator)
+                        .presentationDetents([.large])
                         .presentationDragIndicator(.visible)
             }
         }
@@ -83,6 +86,7 @@ final class SheetCoordinator<Sheet: SheetEnum> {
     }
     @MainActor
     func sheetDismissed() {
+        if sheetStack.isEmpty { return }
         sheetStack.removeFirst()
         
         if let next = sheetStack.first {
